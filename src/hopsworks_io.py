@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import json
 import os
+import random
 import shutil
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -11,6 +13,28 @@ import pandas as pd
 
 from .config import SETTINGS
 from .features import TARGET
+
+
+def _retry(callable_fn, *, retries: int = 4, base_delay: float = 15.0, what: str = "Hopsworks call"):
+    """Retry a zero-arg callable with exponential backoff + jitter.
+
+    Hopsworks' free tier occasionally drops the connection mid-request
+    (RemoteDisconnected / ConnectionError) when a materialization job is
+    launched right after another one, or the cluster is briefly under load.
+    These are transient — a short wait and retry almost always succeeds.
+    """
+    last_exc: Exception | None = None
+    for attempt in range(1, retries + 1):
+        try:
+            return callable_fn()
+        except Exception as exc:  # noqa: BLE001 - hopsworks/urllib3 raise many transient error types
+            last_exc = exc
+            if attempt == retries:
+                break
+            delay = base_delay * attempt + random.uniform(0, 5)
+            print(f"[retry] {what} failed (attempt {attempt}/{retries}): {exc!r}. Retrying in {delay:.0f}s...")
+            time.sleep(delay)
+    raise last_exc
 
 
 def get_project():
@@ -33,7 +57,7 @@ def get_project():
         kwargs["host"] = os.environ["HOPSWORKS_HOST"]
     if os.getenv("HOPSWORKS_CERT_FOLDER"):
         kwargs["cert_folder"] = os.environ["HOPSWORKS_CERT_FOLDER"]
-    return hopsworks.login(**kwargs)
+    return _retry(lambda: hopsworks.login(**kwargs), what="hopsworks.login")
 
 
 def get_raw_feature_group(project=None):
@@ -79,14 +103,17 @@ def ensure_feature_view(project=None):
     project = project or get_project()
     fs = project.get_feature_store()
     fg = get_engineered_feature_group(project)
-    return fs.get_or_create_feature_view(
-        name=SETTINGS.feature_view_name,
-        version=SETTINGS.feature_view_version,
-        query=fg.select_all(),
-        labels=[TARGET],
-        description=(
-            "Rolling six-month Lahore AQI training view. The label is next-hour AQI."
+    return _retry(
+        lambda: fs.get_or_create_feature_view(
+            name=SETTINGS.feature_view_name,
+            version=SETTINGS.feature_view_version,
+            query=fg.select_all(),
+            labels=[TARGET],
+            description=(
+                "Rolling six-month Lahore AQI training view. The label is next-hour AQI."
+            ),
         ),
+        what="ensure_feature_view",
     )
 
 
@@ -104,7 +131,7 @@ def insert_raw(raw_df: pd.DataFrame, city: str | None = None, project=None) -> N
     df["city"] = city or SETTINGS.location_name
     df = _prepare_timestamp_for_hopsworks(df)
     fg = get_raw_feature_group(project)
-    fg.insert(df, operation="upsert", wait=True)
+    _retry(lambda: fg.insert(df, operation="upsert", wait=True), what="insert_raw upsert")
 
 
 def insert_engineered(df: pd.DataFrame, project=None) -> None:
@@ -112,7 +139,7 @@ def insert_engineered(df: pd.DataFrame, project=None) -> None:
         return
     df = _prepare_timestamp_for_hopsworks(df)
     fg = get_engineered_feature_group(project)
-    fg.insert(df, operation="upsert", wait=True)
+    _retry(lambda: fg.insert(df, operation="upsert", wait=True), what="insert_engineered upsert")
 
 
 def _normalize_read(df: pd.DataFrame) -> pd.DataFrame:
