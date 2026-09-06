@@ -1,0 +1,29 @@
+# Final submission checklist
+
+- [ ] Create a **blank** Hopsworks project named `lahore_aqi_predictor`
+- [ ] Create Hopsworks API key
+- [ ] Copy `.env.example` to `.env`
+- [ ] Set `HOPSWORKS_API_KEY`
+- [ ] Set `HOPSWORKS_PROJECT=lahore_aqi_predictor`
+- [ ] `pip install -r requirements.txt`
+- [ ] `python scripts_check_open_meteo.py`
+- [ ] `python scripts_check_hopsworks.py`
+- [ ] `python -m src.backfill`
+- [ ] Verify `lahore_aqi_raw_6m` in Feature Store
+- [ ] Verify `lahore_aqi_engineered_6m` in Feature Store
+- [ ] Verify `lahore_aqi_training_view_6m` Feature View
+- [ ] `python -m src.eda`
+- [ ] `python -m src.train`
+- [ ] Copy real RMSE/MAE/R² into your final written report
+- [ ] Verify `lahore_aqi_forecaster_6m` in Model Registry
+- [ ] `streamlit run app.py`
+- [ ] Check current-day observed + forecast graph
+- [ ] Check next-72-hour forecast
+- [ ] Check six-month history tab
+- [ ] Check Model & SHAP tab
+- [ ] Push project to GitHub without `.env`
+- [ ] Add `HOPSWORKS_API_KEY` and `HOPSWORKS_PROJECT` GitHub secrets
+- [ ] Manually run hourly feature GitHub Action once
+- [ ] Manually run daily training GitHub Action once
+- [ ] Deploy Streamlit
+- [ ] Take screenshots for submission

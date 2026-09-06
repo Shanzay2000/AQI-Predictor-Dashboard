@@ -1,0 +1,12 @@
+{
+  "rmse": 3.606307215795177,
+  "mae": 2.292943072823239,
+  "r2": 0.9655701051249161,
+  "best_model": "xgboost",
+  "history_months": 6,
+  "window_start_utc": "2026-03-05T19:00:00+00:00",
+  "window_end_utc": "2026-09-06T14:49:55.878848+00:00",
+  "usable_rows": 4407,
+  "train_plus_validation_rows": 3745,
+  "test_rows": 662
+}

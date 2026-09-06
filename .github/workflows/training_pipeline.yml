@@ -1,0 +1,38 @@
+name: Lahore Daily Training Pipeline
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "35 1 * * *"  # 06:35 Pakistan Standard Time (UTC+5)
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
+      HOPSWORKS_PROJECT: ${{ secrets.HOPSWORKS_PROJECT }}
+      HISTORY_MONTHS: "6"
+      FORECAST_HOURS: "72"
+      RAW_FEATURE_GROUP_NAME: lahore_aqi_raw_6m
+      RAW_FEATURE_GROUP_VERSION: "1"
+      FEATURE_GROUP_NAME: lahore_aqi_engineered_6m
+      FEATURE_GROUP_VERSION: "1"
+      FEATURE_VIEW_NAME: lahore_aqi_training_view_6m
+      FEATURE_VIEW_VERSION: "1"
+      MODEL_NAME: lahore_aqi_forecaster_6m
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: python -m pip install --upgrade pip
+      - run: pip install -r requirements.txt
+      - run: python -m src.train
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lahore-training-artifacts
+          path: artifacts/
+          if-no-files-found: ignore
