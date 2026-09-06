@@ -1,6 +1,7 @@
 # Lahore AQI Predictor — Final Open-Meteo + Hopsworks Project
 
 **🔗 Live app:** [aqi-predictor-dashboard-shanzay.streamlit.app](https://aqi-predictor-dashboard-shanzay.streamlit.app/)
+
 **Live demo:** [Live-demo-compress.mp4](./Live-demo-compress.mp4)
 
 This is the final, Lahore-only version of the AQI project. It predicts **AQI for Lahore, Pakistan for the current day and the next 72 hours**, using a fully automated Open-Meteo + Hopsworks MLOps pipeline.
