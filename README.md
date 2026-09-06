@@ -94,12 +94,6 @@ python -m src.train
 streamlit run app.py
 ```
 
-Optional API:
-
-```bash
-uvicorn api:app --reload
-```
-
 Then open:
 
 ```text
@@ -113,14 +107,6 @@ http://127.0.0.1:8000/forecast?hours=72
 | `.github/workflows/feature_pipeline.yml` | Hourly | Re-fetches a 7-day overlap and upserts it, so short outages repair themselves automatically. |
 | `.github/workflows/training_pipeline.yml` | Daily, 06:35 Pakistan time | Retrains on **only the latest six months** and registers the best model. |
 
-## Tests
-
-```bash
-python -m compileall src app.py api.py
-pytest -q
-```
-
-The supplied final project passes its local unit tests without needing Hopsworks credentials.
 
 ## Generated artifacts after training
 
