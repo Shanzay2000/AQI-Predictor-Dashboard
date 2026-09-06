@@ -29,7 +29,21 @@ jobs:
           cache: pip
       - run: python -m pip install --upgrade pip
       - run: pip install -r requirements.txt
-      - run: python -m src.train
+      - name: Run training pipeline (retries on transient Hopsworks/network errors)
+        run: |
+          for attempt in 1 2 3; do
+            echo "Attempt $attempt of 3..."
+            if python -m src.train; then
+              echo "Succeeded on attempt $attempt."
+              exit 0
+            fi
+            echo "Attempt $attempt failed."
+            if [ "$attempt" -lt 3 ]; then
+              sleep 60
+            fi
+          done
+          echo "All 3 attempts failed."
+          exit 1
       - uses: actions/upload-artifact@v4
         if: always()
         with:
