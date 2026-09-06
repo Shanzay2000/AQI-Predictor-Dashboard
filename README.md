@@ -4,7 +4,7 @@
 
 **Live demo:** [Live-demo-compress.mp4](./Live-demo-compress.mp4)
 
-**Final report:** [final_report.pdf](./final_report.pdf)
+**Final report:** [final_report.pdf](./final%20report.pdf)
 
 This is the final, Lahore-only version of the AQI project. It predicts **AQI for Lahore, Pakistan for the current day and the next 72 hours**, using a fully automated Open-Meteo + Hopsworks MLOps pipeline.
 
