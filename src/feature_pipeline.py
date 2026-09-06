@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+
 from .config import SETTINGS
 from .features import build_feature_table, build_supervised
 from .hopsworks_io import ensure_feature_view, insert_engineered, insert_raw
@@ -8,7 +10,6 @@ from .open_meteo import fetch_recent_observations
 
 def main() -> None:
     # Re-fetch a seven-day rolling overlap on every scheduled run. Upserts make this
-    # idempotent and automatically repair short GitHub Actions/Hopsworks outages.
     raw = fetch_recent_observations(
         SETTINGS.latitude,
         SETTINGS.longitude,
@@ -18,6 +19,8 @@ def main() -> None:
         raise RuntimeError("Open-Meteo recent feed returned no rows")
 
     insert_raw(raw, SETTINGS.location_name)
+
+    time.sleep(20)
 
     feature_table = build_feature_table(
         raw, SETTINGS.location_name, timezone=SETTINGS.local_timezone
