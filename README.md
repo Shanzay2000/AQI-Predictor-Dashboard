@@ -4,6 +4,8 @@
 
 **Live demo:** [Live-demo-compress.mp4](./Live-demo-compress.mp4)
 
+**Final report:** [final_report.pdf](./final_report.pdf)
+
 This is the final, Lahore-only version of the AQI project. It predicts **AQI for Lahore, Pakistan for the current day and the next 72 hours**, using a fully automated Open-Meteo + Hopsworks MLOps pipeline.
 
 The model is deliberately trained on **no more than the latest six calendar months** of hourly Lahore data. The training code re-computes that six-month boundary every time it runs, so older rows are ignored even if the feature store has been operating for longer — this keeps the project comfortably inside Hopsworks' free-tier storage limit while still giving the models enough history to learn seasonal and daily patterns.
